@@ -32,6 +32,7 @@ cd Smart-Energy-Network-Device-Simulator-using-libmodbus
 ./configure
 make
 sudo make install
+```
 
 Ensure that your system’s library path is updated, which can be done by running `sudo ldconfig`.
 
@@ -53,6 +54,7 @@ Run the simulator with the following command in separate terminal windows to tes
 
 # Start the 1T Modem integration
 ./sim_1t_modem
+```
 
 The simulator supports both TCP and RTU Modbus modes. Use `--help` with each simulation command for options and configurations.
 
@@ -61,7 +63,9 @@ Testing is available to verify correct functionality:
 
 ```bash
 make test
-Run specific tests for individual devices or for the entire suite. Detailed testing information can be found in the `tests/` directory.
+Run specific tests for individual devices or for the entire suite.
+Detailed testing information can be found in the `tests/` directory.
+```
 
 ## Contributing
 Contributions are welcome. Please refer to the `CONTRIBUTING.md` file for guidelines.
@@ -72,5 +76,6 @@ Comprehensive documentation can be served locally:
 ```bash
 pip install mkdocs-material
 mkdocs serve
+```
 
-For further information on the Modbus protocol and this project, visit the official Modbus website.
+For further information on the Modbus protocol and this project, visit the [official Modbus website](https://libmodbus.org/).
