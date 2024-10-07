@@ -51,3 +51,4 @@ tests/version
 tests/stamp-h2
 tests/sim_pv_inverter
 tests/sim_substation_meter
+tests/sim_controller
