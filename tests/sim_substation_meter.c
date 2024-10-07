@@ -11,7 +11,7 @@
 #define FILE_NAME "modbus_registers.txt"
 #define NUM_REGISTERS 11
 
-#define MODBUS_IP "10.10.1.50"
+#define CONTROLLER_IP "10.10.1.150" 
 #define MODBUS_PORT 1502
 
 void initialize_registers(int *registers);
@@ -59,13 +59,13 @@ void check_file(int *prev_values, modbus_t *ctx) {
 
 
 modbus_t* initialize_modbus(void) {
-    modbus_t *ctx = modbus_new_tcp(MODBUS_IP, MODBUS_PORT);
+    modbus_t *ctx = modbus_new_tcp(CONTROLLER_IP, MODBUS_PORT);
     if (modbus_connect(ctx) == -1) {
         fprintf(stderr, "Connection to Modbus server failed: %s\n", modbus_strerror(errno));
         modbus_free(ctx);
         return NULL;
     }
-    printf("Connected to Modbus server at %s:%d\n", MODBUS_IP, MODBUS_PORT);
+    printf("Connected to Modbus server at %s:%d\n", CONTROLLER_IP, MODBUS_PORT);
     return ctx;
 }
 
