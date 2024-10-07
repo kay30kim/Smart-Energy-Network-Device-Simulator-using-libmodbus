@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#define CONTROLLER_IP "10.10.1.150"
+#define CONTROLLER_IP "10.10.1.20"
 #define MODBUS_PORT 1502
 #define NUM_REGISTERS 11
 
