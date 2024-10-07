@@ -9,8 +9,8 @@ noinst_PROGRAMS = \
 	unit-test-server \
 	unit-test-client \
 	version \
-	pv_invertor_simulation \
-	substation_simulation
+	sim_pv_inverter \
+	sim_substation_meter
 
 common_ldflags = \
 	$(top_builddir)/src/libmodbus.la
@@ -36,11 +36,11 @@ unit_test_server_LDADD = $(common_ldflags)
 unit_test_client_SOURCES = unit-test-client.c unit-test.h
 unit_test_client_LDADD = $(common_ldflags)
 
-pv_invertor_simulation_SOURCES = pv-invertor-simulation.c
-pv_invertor_simulation_LDADD = $(common_ldflags)
+sim_pv_inverter_SOURCES = sim_pv_inverter.c
+sim_pv_inverter_LDADD = $(common_ldflags)
 
-substation_simulation_SOURCES = substation-simulation.c
-substation_simulation_LDADD = $(common_ldflags)
+sim_substation_meter_SOURCES = sim_substation_meter.c
+sim_substation_meter_LDADD = $(common_ldflags)
 
 version_SOURCES = version.c
 version_LDADD = $(common_ldflags)
