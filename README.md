@@ -29,6 +29,10 @@ git clone https://github.com/kay30kim/Smart-Energy-Network-Device-Simulator-usin
 cd Smart-Energy-Network-Device-Simulator-using-libmodbus
 
 # Compile with libmodbus
+./autogen.sh
+-> if ./autogen.sh 2: autoreconf: not found
+-> -> sudo apt install autoconf automake libtool pkg-config build-essential
+
 ./configure
 make
 sudo make install
