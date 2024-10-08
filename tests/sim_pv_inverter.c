@@ -87,18 +87,6 @@ modbus_mapping_t* initialize_modbus_mapping_simulation() {
     return mb_mapping;
 }
 
-// // Function to update the file with a specific register address and its value
-// void update_file(int address, int value) {
-//     FILE *file = fopen(FILE_NAME, "a");  // Append to the file instead of overwriting
-//     if (file == NULL) {
-//         fprintf(stderr, "Failed to open file for writing\n");
-//         return;
-//     }
-
-//     // Write the address and value to the file
-//     fprintf(file, "%d %d\n", address, value);
-//     fclose(file);
-// }
 // Update the value of a specific register in the file
 void update_file(int address, int value) {
     FILE *file = fopen(FILE_NAME, "r+");  // read & write
@@ -197,93 +185,95 @@ int main(int argc, char* argv[]) {
 
     initialize_file();
 
-    // Initialize Modbus context
-    ctx = initialize_modbus_context_simulation(use_backend, ip_or_device);
-    if (ctx == NULL) {
-        fprintf(stderr, "Failed to create Modbus context\n");
-        return -1;
-    }
+    while (TRUE) {
+        printf("Witing for request from 1T modem...\n");
+        // Initialize Modbus context
+        ctx = initialize_modbus_context_simulation(use_backend, ip_or_device);
+        if (ctx == NULL) {
+            fprintf(stderr, "Failed to create Modbus context\n");
+            return -1;
+        }
+        // Set debug mode for logging
+        modbus_set_debug(ctx, TRUE);
 
-    // Set debug mode for logging
-    modbus_set_debug(ctx, TRUE);
-
-    // Initialize Modbus mapping for registers
-    mb_mapping = initialize_modbus_mapping_simulation();
-    if (mb_mapping == NULL) {
-        modbus_free(ctx);
-        return -1;
-    }
-
-    // Set up the server
-    socket_file_descriptor = setup_server_simulation(use_backend, ctx);
-    if (socket_file_descriptor == -1) {
-        printf("socket_file_descriptor = -1\n");
-        modbus_mapping_free(mb_mapping);
-        modbus_free(ctx);
-        return -1;
-    }
-
-    header_length = modbus_get_header_length(ctx);  // Set the header length for the protocol
-
-    // Initialize all registers to 10
-    for (int i = 0; i < NUM_REGISTERS; i++) {
-        mb_mapping->tab_registers[i] = 10;
-    }
-
-    // Main loop for handling Modbus requests
-    for (;;) {
-        do {
-            rc = modbus_receive(ctx, query);
-        } while (rc == 0);  // Wait until non-zero data is received
-
-        if (rc == -1 && errno != EMBBADCRC) {
-            printf("Communication error: %s\n", modbus_strerror(errno));
-            break;
+        // Initialize Modbus mapping for registers
+        mb_mapping = initialize_modbus_mapping_simulation();
+        if (mb_mapping == NULL) {
+            modbus_free(ctx);
+            return -1;
         }
 
-        // Handle register update requests (single register, multiple registers)
-        if (query[header_length] == 0x06) {  // MODBUS_FC_WRITE_SINGLE_REGISTER
-            int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
-            uint16_t value = MODBUS_GET_INT16_FROM_INT8(query, header_length + 4);
-            printf("Current register value at %d: %d\n", address, mb_mapping->tab_registers[address]);
-            mb_mapping->tab_registers[address] = value;  // Update the register value
-            printf("Updated register %d with value: %d\n", address, value);
-            // Update the file with the new register value
-            update_file(address, value);
-        } else if (query[header_length] == 0x05) {  // MODBUS_FC_WRITE_SINGLE_COIL
-            int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
-            uint8_t value = query[header_length + 4];
-            printf("Current coil value at %d: %d\n", address, mb_mapping->tab_bits[address]);
-            mb_mapping->tab_bits[address] = value ? 1 : 0;
-            printf("Updated coil %d with value: %d\n", address, value);
-        } else if (query[header_length] == 0x10) {  // MODBUS_FC_WRITE_MULTIPLE_REGISTERS
-            int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
-            int reg_count = MODBUS_GET_INT16_FROM_INT8(query, header_length + 3);
-            for (int i = 0; i < reg_count; i++) {
-                uint16_t value = MODBUS_GET_INT16_FROM_INT8(query, header_length + 7 + i * 2);
-                printf("Current register value at %d: %d\n", address + i, mb_mapping->tab_registers[address + i]);
-                mb_mapping->tab_registers[address + i] = value;
-                printf("Updated register %d with value: %d\n", address + i, value);
+        // Set up the server
+        socket_file_descriptor = setup_server_simulation(use_backend, ctx);
+        if (socket_file_descriptor == -1) {
+            printf("socket_file_descriptor = -1\n");
+            modbus_mapping_free(mb_mapping);
+            modbus_free(ctx);
+            return -1;
+        }
+
+        header_length = modbus_get_header_length(ctx);  // Set the header length for the protocol
+
+        // Initialize all registers to 10
+        for (int i = 0; i < NUM_REGISTERS; i++) {
+            mb_mapping->tab_registers[i] = 10;
+        }
+
+        // Main loop for handling Modbus requests
+        for (;;) {
+            do {
+                rc = modbus_receive(ctx, query);
+            } while (rc == 0);  // Wait until non-zero data is received
+            if (rc == -1 && errno != EMBBADCRC) {
+                printf("Communication error: %s\n", modbus_strerror(errno));
+                break;
+            }
+            printf("header_legnth = %d, query[header_length] = %d\n", header_length, query[header_length]);
+            // Handle register update requests (single register, multiple registers)
+            if (query[header_length] == 0x06) {  // MODBUS_FC_WRITE_SINGLE_REGISTER
+                int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
+                uint16_t value = MODBUS_GET_INT16_FROM_INT8(query, header_length + 4);
+                printf("Current register value at %d: %d\n", address, mb_mapping->tab_registers[address]);
+                mb_mapping->tab_registers[address] = value;  // Update the register value
+                printf("Updated register %d with value: %d\n", address, value);
+                // Update the file with the new register value
+                update_file(address, value);
+            } else if (query[header_length] == 0x05) {  // MODBUS_FC_WRITE_SINGLE_COIL
+                int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
+                uint8_t value = query[header_length + 4];
+                printf("Current coil value at %d: %d\n", address, mb_mapping->tab_bits[address]);
+                mb_mapping->tab_bits[address] = value ? 1 : 0;
+                printf("Updated coil %d with value: %d\n", address, value);
+            } else if (query[header_length] == 0x10) {  // MODBUS_FC_WRITE_MULTIPLE_REGISTERS
+                int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
+                int reg_count = MODBUS_GET_INT16_FROM_INT8(query, header_length + 3);
+                for (int i = 0; i < reg_count; i++) {
+                    uint16_t value = MODBUS_GET_INT16_FROM_INT8(query, header_length + 7 + i * 2);
+                    printf("Current register value at %d: %d\n", address + i, mb_mapping->tab_registers[address + i]);
+                    mb_mapping->tab_registers[address + i] = value;
+                    printf("Updated register %d with value: %d\n", address + i, value);
+                }
+            }
+
+            // Send response to the Modbus client
+            rc = modbus_reply(ctx, query, rc, mb_mapping);
+            if (rc == -1) {
+                printf("Error in sending reply: %s\n", modbus_strerror(errno));
+                break;
+            }
+            printf("\n");
+        }
+        // Cleanup and shutdown
+        if (use_backend == TCP || use_backend == TCP_PI) {
+            if (socket_file_descriptor != -1) {
+                close(socket_file_descriptor);
             }
         }
-
-        // Send response to the Modbus client
-        rc = modbus_reply(ctx, query, rc, mb_mapping);
-        if (rc == -1) {
-            printf("Error in sending reply: %s\n", modbus_strerror(errno));
-            break;
-        }
+        modbus_mapping_free(mb_mapping);
+        modbus_close(ctx);
+        modbus_free(ctx);
+        printf("\n");
     }
-
-    // Cleanup and shutdown
-    if (use_backend == TCP || use_backend == TCP_PI) {
-        if (socket_file_descriptor != -1) {
-            close(socket_file_descriptor);
-        }
-    }
-    modbus_mapping_free(mb_mapping);
-    modbus_close(ctx);
-    modbus_free(ctx);
     return 0;
 }
 
