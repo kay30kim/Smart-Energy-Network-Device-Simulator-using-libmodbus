@@ -100,10 +100,10 @@ void update_file(int address, int value) {
     int found = 0; // check whether they have the address or not => Think about the maximum registers number
 
     while (fgets(buffer, sizeof(buffer), file)) {
-        if (sscanf(buffer, "%6d    %d", &current_address, &current_value) == 2) {
+        if (sscanf(buffer, "%6d    %6d", &current_address, &current_value) == 2) {
             if (current_address == address) { // TODO : need to support hexdecimal as well
                 fseek(file, -strlen(buffer), SEEK_CUR);  // Move to first place of this line
-                fprintf(file, "%6d    %d\n", address, value);  // Update
+                fprintf(file, "%6d    %6d\n", address, value);  // Update
                 found = 1;
                 break;
             }
@@ -112,7 +112,7 @@ void update_file(int address, int value) {
 
     if (!found) {
         fseek(file, 0, SEEK_END);  // end of the file
-        fprintf(file, "%6d    %d\n", address, value);
+        fprintf(file, "%6d    %6d\n", address, value);
     }
 
     fclose(file);
@@ -162,10 +162,7 @@ void initialize_file(void) {
     }
     fprintf(file, "Address Value\n");
     for (int i = 0; i < NUM_REGISTERS / 2; i++) {
-        fprintf(file, "%6d    10\n", i);  // Initialize with default value 10
-    }
-    for (int i = NUM_REGISTERS / 2; i < NUM_REGISTERS; i++) {
-        fprintf(file, "0x%04x    10\n", i);  // Initialize with default value 10
+        fprintf(file, "%6d    %6d\n", i, 10);  // Initialize with default value 10
     }
     fclose(file);
 }
