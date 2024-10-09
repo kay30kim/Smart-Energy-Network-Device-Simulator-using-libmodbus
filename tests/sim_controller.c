@@ -12,6 +12,7 @@
 #define SERVER_IP "10.10.1.20" // Garibaldi IP
 #define MODBUS_PORT 1502
 #define NUM_REGISTERS 30
+#define SIMULATOR "Garibaldi"
 
 int main(void) {
     modbus_t *ctx;
@@ -20,6 +21,7 @@ int main(void) {
     uint8_t query[MODBUS_TCP_MAX_ADU_LENGTH];
     int socket_fd;
 
+    printf("%s is activating..!\n", SIMULATOR);
     // Initialize Modbus TCP server
     ctx = modbus_new_tcp(SERVER_IP, MODBUS_PORT);
     if (!ctx) {
