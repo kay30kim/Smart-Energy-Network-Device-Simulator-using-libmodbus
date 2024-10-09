@@ -52,6 +52,8 @@ tests/stamp-h2
 tests/sim_pv_inverter
 tests/sim_substation_meter
 tests/sim_controller
+tests/sim_ev_charger
+tests/sim_heat_pump
 
 # Simulation generates
 tests/pv_inverter_registers.txt
