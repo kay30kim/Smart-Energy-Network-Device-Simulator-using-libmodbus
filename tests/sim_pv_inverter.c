@@ -10,7 +10,7 @@
 
 #define SERVER_ID 1
 #define FILE_NAME "modbus_registers.txt"
-#define NUM_REGISTERS 30
+#define NUM_REGISTERS 5
 
 // Prototypes
 int set_backend_simulation(int argc, char* argv[]);
@@ -161,8 +161,8 @@ void initialize_file(void) {
         return;
     }
     fprintf(file, "Address Value\n");
-    for (int i = 0; i < NUM_REGISTERS / 2; i++) {
-        fprintf(file, "%6d    %6d\n", i, 10);  // Initialize with default value 10
+    for (int i = 0; i < NUM_REGISTERS; i++) {
+        fprintf(file, "%6d    %6d\n", 3000 + i, 10);  // Initialize with default value 10
     }
     fclose(file);
 }
@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
             // Handle register update requests (single register, multiple registers)
             if (query[header_length] == 0x06) {  // MODBUS_FC_WRITE_SINGLE_REGISTER
                 int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
-                uint16_t value = MODBUS_GET_INT16_FROM_INT8(query, header_length + 4);
+                uint16_t value = MODBUS_GET_INT16_FROM_INT8(query, header_length + 4) / 256;
                 printf("Current register value at %d: %d\n", address, mb_mapping->tab_registers[address]);
                 mb_mapping->tab_registers[address] = value;  // Update the register value
                 printf("Updated register %d with value: %d\n", address, value);
