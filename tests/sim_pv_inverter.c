@@ -8,9 +8,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#define SERVER_ID 1
-#define FILE_NAME "modbus_registers.txt"
-#define NUM_REGISTERS 5
+#define SERVER_ID 2
+#define FILE_NAME "pv_inverter_registers.txt"
+#define NUM_REGISTERS 2
+#define SIMULATOR "PV Inverter"
 
 // Prototypes
 int set_backend_simulation(int argc, char* argv[]);
@@ -18,7 +19,7 @@ char* set_ip_or_device_simulation(int use_backend, int argc, char* argv[]);
 modbus_t* initialize_modbus_context_simulation(int use_backend, char* ip_or_device);
 modbus_mapping_t* initialize_modbus_mapping_simulation(void);
 int setup_server_simulation(int use_backend, modbus_t* ctx);
-void update_file(int address, int value);
+void update_file(int address, float value);
 void initialize_file(void);
 
 enum {
@@ -80,7 +81,7 @@ modbus_t* initialize_modbus_context_simulation(int use_backend, char* ip_or_devi
 
 // Initialize Modbus register mapping
 modbus_mapping_t* initialize_modbus_mapping_simulation() {
-    modbus_mapping_t* mb_mapping = modbus_mapping_new_start_address(0, 0, 0, 0, 0, NUM_REGISTERS, 0, 0);  // Set 10 registers
+    modbus_mapping_t* mb_mapping = modbus_mapping_new_start_address(0, 0, 0, 0, 0, NUM_REGISTERS, 0, 0);
     if (mb_mapping == NULL) {
         fprintf(stderr, "Failed to allocate the mapping: %s\n", modbus_strerror(errno));
     }
@@ -88,7 +89,7 @@ modbus_mapping_t* initialize_modbus_mapping_simulation() {
 }
 
 // Update the value of a specific register in the file
-void update_file(int address, int value) {
+void update_file(int address, float value) {
     FILE *file = fopen(FILE_NAME, "r+");  // read & write
     if (file == NULL) {
         fprintf(stderr, "Can't open file\n");
@@ -96,14 +97,15 @@ void update_file(int address, int value) {
     }
 
     char buffer[256];
-    int current_address, current_value;
+    int current_address;
+    float current_value;
     int found = 0; // check whether they have the address or not => Think about the maximum registers number
 
     while (fgets(buffer, sizeof(buffer), file)) {
-        if (sscanf(buffer, "%6d    %6d", &current_address, &current_value) == 2) {
+        if (sscanf(buffer, "0x%4d    %6f", &current_address, &current_value) == 2) {
             if (current_address == address) { // TODO : need to support hexdecimal as well
                 fseek(file, -strlen(buffer), SEEK_CUR);  // Move to first place of this line
-                fprintf(file, "%6d    %6d\n", address, value);  // Update
+                fprintf(file, "0x%4d    %6f\n", address, value);  // Update
                 found = 1;
                 break;
             }
@@ -112,7 +114,7 @@ void update_file(int address, int value) {
 
     if (!found) {
         fseek(file, 0, SEEK_END);  // end of the file
-        fprintf(file, "%6d    %6d\n", address, value);
+        fprintf(file, "%6d    %6.1f\n", address, value);
     }
 
     fclose(file);
@@ -160,10 +162,12 @@ void initialize_file(void) {
         fprintf(stderr, "Failed to create file\n");
         return;
     }
+    fprintf(file, "Current Register\n");
     fprintf(file, "Address Value\n");
-    for (int i = 0; i < NUM_REGISTERS; i++) {
-        fprintf(file, "%6d    %6d\n", 3000 + i, 10);  // Initialize with default value 10
-    }
+    fprintf(file, "0x%4d    %6.1f\n\n", 3002, 10.0);
+    fprintf(file, "Voltage Register\n");
+    fprintf(file, "Address Value\n");
+    fprintf(file, "0x%4d    %6.1f\n", 3022, 100.0);
     fclose(file);
 }
 
@@ -180,6 +184,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    printf("%s is activating..!\n", SIMULATOR);
     initialize_file();
 
     while (TRUE) {
@@ -229,10 +234,10 @@ int main(int argc, char* argv[]) {
             // Handle register update requests (single register, multiple registers)
             if (query[header_length] == 0x06) {  // MODBUS_FC_WRITE_SINGLE_REGISTER
                 int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
-                uint16_t value = MODBUS_GET_INT16_FROM_INT8(query, header_length + 4) / 256;
+                float value = (float)(MODBUS_GET_INT16_FROM_INT8(query, header_length + 4)) / 256;
                 printf("Current register value at %d: %d\n", address, mb_mapping->tab_registers[address]);
-                mb_mapping->tab_registers[address] = value;  // Update the register value
-                printf("Updated register %d with value: %d\n", address, value);
+                mb_mapping->tab_registers[address] = (uint16_t)value;  // Update the register value
+                printf("Updated register %d with value: %6.1f\n", address, value);
                 // Update the file with the new register value
                 update_file(address, value);
             } else if (query[header_length] == 0x05) {  // MODBUS_FC_WRITE_SINGLE_COIL
@@ -245,10 +250,10 @@ int main(int argc, char* argv[]) {
                 int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
                 int reg_count = MODBUS_GET_INT16_FROM_INT8(query, header_length + 3);
                 for (int i = 0; i < reg_count; i++) {
-                    uint16_t value = MODBUS_GET_INT16_FROM_INT8(query, header_length + 7 + i * 2);
+                    float value = (float)(MODBUS_GET_INT16_FROM_INT8(query, header_length + 7 + i * 2));
                     printf("Current register value at %d: %d\n", address + i, mb_mapping->tab_registers[address + i]);
-                    mb_mapping->tab_registers[address + i] = value;
-                    printf("Updated register %d with value: %d\n", address + i, value);
+                    mb_mapping->tab_registers[address + i] = (uint16_t)value;
+                    printf("Updated register %d with value: %6.1f\n", address + i, value);
                 }
             }
 
