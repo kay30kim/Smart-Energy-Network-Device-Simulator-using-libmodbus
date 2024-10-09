@@ -11,7 +11,7 @@
 
 #define SERVER_IP "10.10.1.20" // Garibaldi IP
 #define MODBUS_PORT 1502
-#define NUM_REGISTERS 11
+#define NUM_REGISTERS 30
 
 int main(void) {
     modbus_t *ctx;
