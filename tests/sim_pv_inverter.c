@@ -8,9 +8,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#define SERVER_ID 2
+#define SERVER_ID 1
 #define FILE_NAME "pv_inverter_registers.txt"
-#define NUM_REGISTERS 2
+#define NUM_REGISTERS 30
 #define SIMULATOR "PV Inverter"
 
 // Prototypes
@@ -105,7 +105,7 @@ void update_file(int address, float value) {
         if (sscanf(buffer, "0x%4d    %6f", &current_address, &current_value) == 2) {
             if (current_address == address) { // TODO : need to support hexdecimal as well
                 fseek(file, -strlen(buffer), SEEK_CUR);  // Move to first place of this line
-                fprintf(file, "0x%4d    %6f\n", address, value);  // Update
+                fprintf(file, "0x%4d    %6.1f\n", address, value);  // Update
                 found = 1;
                 break;
             }
@@ -239,7 +239,7 @@ int main(int argc, char* argv[]) {
                 mb_mapping->tab_registers[address] = (uint16_t)value;  // Update the register value
                 printf("Updated register %d with value: %6.1f\n", address, value);
                 // Update the file with the new register value
-                update_file(address, value);
+                update_file(address + 3000, value);
             } else if (query[header_length] == 0x05) {  // MODBUS_FC_WRITE_SINGLE_COIL
                 int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
                 uint8_t value = query[header_length + 4];
