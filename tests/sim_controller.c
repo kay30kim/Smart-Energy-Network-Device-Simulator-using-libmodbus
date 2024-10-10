@@ -9,8 +9,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#define SERVER_IP "10.10.1.20" // Garibaldi IP
-#define MODBUS_PORT 1502
+#define SERVER_IP "10.10.2.20" // Garibaldi IP
+#define MODBUS_PORT 1503
 #define NUM_REGISTERS 30
 #define SIMULATOR "Garibaldi"
 
@@ -21,7 +21,6 @@ int main(void) {
     uint8_t query[MODBUS_TCP_MAX_ADU_LENGTH];
     int socket_fd;
 
-    printf("%s is activating..!\n", SIMULATOR);
     // Initialize Modbus TCP server
     ctx = modbus_new_tcp(SERVER_IP, MODBUS_PORT);
     if (!ctx) {
@@ -44,7 +43,8 @@ int main(void) {
         return -1;
     }
 
-    printf("Controller running and waiting for changes...\n");
+    printf("%s is activating..!\n", SIMULATOR);
+    printf("Controller is running and waiting for changes...\n");
 
     for (;;) {
         int client_socket = modbus_tcp_accept(ctx, &socket_fd);
@@ -70,7 +70,10 @@ int main(void) {
             // Print updated registers
             printf("All registers\n");
             for (int i = 0; i < NUM_REGISTERS; i++) {
-                printf("Register[%d] = %d\n", i, mb_mapping->tab_registers[i]);
+                if (mb_mapping->tab_registers[i] > 32768)
+                    printf("Register[%d] = %d\n", i + 3000, mb_mapping->tab_registers[i] - 65536);
+                else
+                    printf("Register[%d] = %d\n", i + 3000, mb_mapping->tab_registers[i]);
             }
             printf("\n");
         }
