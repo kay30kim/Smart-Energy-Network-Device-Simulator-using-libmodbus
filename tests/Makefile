@@ -1073,6 +1073,10 @@ maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
+	@rm -f pv_inverter_registers.txt
+	@rm -f substation_registers.txt
+	@rm -f ev_charger_registers.txt
+	@rm -f heat_pump_registers.txt
 
 clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
 	mostlyclean-am
@@ -1142,7 +1146,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/random-test-client.Po
 	-rm -f ./$(DEPDIR)/random-test-server.Po
 	-rm -f ./$(DEPDIR)/sim_pv_inverter.Po
-	-rm -f ./4(DEPDIR)/sim_heat_pump.Po
+	-rm -f ./$(DEPDIR)/sim_heat_pump.Po
 	-rm -f ./$(DEPDIR)/sim_ev_charger.Po
 	-rm -f ./$(DEPDIR)/sim_substation_meter.Po
 	-rm -f ./$(DEPDIR)/sim_controller.Po
