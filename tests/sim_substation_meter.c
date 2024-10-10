@@ -18,18 +18,20 @@
 #define HEAT_PUMP 1
 #define NUM_REGISTERS 30    // substaion meter has 0x3000 ~ 0x3030 address
 
-#define CONTROLLER_IP "10.10.1.20"
-#define MODBUS_PORT 1502
+#define CONTROLLER_IP "10.10.2.20"
+#define MODBUS_PORT 1503
 #define SIMULATOR "Substaion Meter"
 
-void initialize_registers(float *registers, char *filename, int im_ex_port);
+void initialize_registers(float *registers, char *filename, int im_ex_port, modbus_t *ctx);
 void check_file_and_notify(float *prev_values, modbus_t *ctx, char *filename, int im_ex_port);
 modbus_t* initialize_modbus(const char *ip, int port);
-void initialize_file(float *prev_values) ;
+void initialize_file(float *prev_values);
+void updateTotalValue(modbus_t *ctx, float *prev_values);
+void update_file(float *prev_values);
 
 float totalCurrent, totalVoltage;
 
-void initialize_registers(float *registers, char *filename, int im_ex_port) {
+void initialize_registers(float *registers, char *filename, int im_ex_port, modbus_t *ctx) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         fprintf(stderr, "Failed to open the file: %s\n", strerror(errno));
@@ -47,7 +49,7 @@ void initialize_registers(float *registers, char *filename, int im_ex_port) {
             currentOrVoltage = 0;
         }
         else if (sscanf(line, "0x%4d    %6f", &address, &value) == 2) {
-            if (address > 3000)
+            if (address >= 3000)
                 address -= 3000;
             if (address > NUM_REGISTERS)
                 printf("Error : Register address is out of range(0x3000 ~ 0x3030)");
@@ -65,6 +67,15 @@ void initialize_registers(float *registers, char *filename, int im_ex_port) {
                     else
                         totalVoltage += value;
                 }
+                if (ctx != NULL) {
+                    int rc = modbus_write_register(ctx, address, value);
+                    if (rc == -1) {
+                        fprintf(stderr, "Failed to notify controller: %s\n", modbus_strerror(errno));
+                    } else {
+                        printf("Controller notified: Register %d updated to %f\n", address, value); //Need to be commented
+                    }
+                }
+                printf("Total current = %.1f, Total voltage = %.1f\n", totalCurrent, totalVoltage);
             }
         }
     }
@@ -82,40 +93,43 @@ void check_file_and_notify(float *prev_values, modbus_t *ctx, char *filename, in
     while (fgets(line, sizeof(line), file)) {
         int address;
         float value;
-        if (strcmp(line, "Current Register") == 0)
+        if (strcmp(line, "Current Register\n") == 0)
             currentOrVoltage = 1;
-        else if (strcmp(line, "Voltage Register") == 0)
+        else if (strcmp(line, "Voltage Register\n") == 0)
             currentOrVoltage = 0;
         else if (sscanf(line, "0x%4d    %6f", &address, &value) == 2) { // NUM registers가 수정되어야 함
-            if (address >= 0 && address < NUM_REGISTERS) { // PV Inverter꺼만 받는거고, Heat pump, EvCharger에 대해서도 프린트 해야함 + 그걸 파일로 저장
-                if (address > 3000)                         // pv Inverter 쪽에서 current랑 voltage를 적어야한다.
-                    address -= 3000;
-                if (address > NUM_REGISTERS)
-                    printf("Error : Register address is out of range(0x3000 ~ 0x3030)");
-                else if (prev_values[address] != value) {
-                    printf("%s: register %d changed from %f to %f\n", filename, address, prev_values[address], value);
-                    prev_values[address] = value;
-                    if (im_ex_port == 1) {  // import - heat pump or ev charger
-                        if (currentOrVoltage)
-                            totalCurrent = totalCurrent + prev_values[address] - value;
-                        else
-                            totalVoltage = totalVoltage + prev_values[address] - value;
-                    }
-                    else {                  // export - inverter
-                        if (currentOrVoltage)
-                            totalCurrent = totalCurrent - prev_values[address] + value;
-                        else
-                            totalVoltage = totalVoltage - prev_values[address] + value;
-                    }
-                    if (ctx != NULL) {
-                        int rc = modbus_write_register(ctx, address, value);
-                        if (rc == -1) {
-                            fprintf(stderr, "Failed to notify controller: %s\n", modbus_strerror(errno));
-                        } else {
-                            printf("Controller notified: Register %d updated to %f\n", address, value); //Need to be commented
-                        }
-                    }
+            if (address >= 3000)                         // pv Inverter 쪽에서 current랑 voltage를 적어야한다.
+                address -= 3000;
+            if (address > NUM_REGISTERS)
+                printf("Error : Register address is out of range(0x3000 ~ 0x3030)");
+            else if (prev_values[address] != value) {
+                printf("%s: register %d changed from %.1f to %.1f\n", filename, address, prev_values[address], value);
+                printf("currentOrVoltabe = %d, totalCurrent = %.1f\n", currentOrVoltage, totalCurrent);
+                if (im_ex_port == 1) {  // import - heat pump or ev charger
+                    if (currentOrVoltage)
+                        totalCurrent = totalCurrent + prev_values[address] - value;
+                    else
+                        totalVoltage = totalVoltage + prev_values[address] - value;
                 }
+                else {                  // export - inverter
+                    if (currentOrVoltage)
+                        totalCurrent = totalCurrent - prev_values[address] + value;
+                    else
+                        totalVoltage = totalVoltage - prev_values[address] + value;
+                }
+                prev_values[address] = value;
+                printf(">currentOrVoltabe = %d, totalCurrent = %.1f\n", currentOrVoltage, totalCurrent);
+                if (ctx != NULL) {
+                    int rc = modbus_write_register(ctx, address, value);
+                    if (rc == -1) {
+                        fprintf(stderr, "Failed to notify controller: %s\n", modbus_strerror(errno));
+                    } else {
+                        printf("Controller notified: Register %d updated to %f\n", address, value); //Need to be commented
+                    }
+                    updateTotalValue(ctx, prev_values);
+                }
+                update_file(prev_values);
+                printf("Total current = %.1f, Total voltage = %.1f\n", totalCurrent, totalVoltage);
             }
         }
     }
@@ -133,15 +147,11 @@ modbus_t* initialize_modbus(const char *ip, int port) {
     return ctx;
 }
 
-void initialize_file(float *prev_values) {
-    // Try to open the file in read mode
-    FILE *file_read = fopen(SM_FILE, "r");
-    if (file_read != NULL) {
-        // File exists, so we close it and do nothing
-        fclose(file_read);
-        return;
+void update_file(float *prev_values) {
+    printf("Registers print.\n");
+    for (int i = 0; i <NUM_REGISTERS; i++) {
+        printf("%d : %f\n", 3000+i, prev_values[i]);
     }
-
     FILE *file = fopen(SM_FILE, "w");
     if (file == NULL) {
         fprintf(stderr, "Failed to create file\n");
@@ -159,6 +169,52 @@ void initialize_file(float *prev_values) {
         fprintf(file, "0x302%d    %6.1f\n", i, prev_values[20+i]);
     }
     fprintf(file, "[Voltage Avg] 0x3026 : %6.1f\n", totalVoltage);
+    fclose(file);
+}
+
+void initialize_file(float *prev_values) {
+    // Try to open the file in read mode
+    FILE *file_read = fopen(SM_FILE, "r");
+    if (file_read != NULL) {
+        // File exists, so we close it and do nothing
+        fclose(file_read);
+        return;
+    }
+    FILE *file = fopen(SM_FILE, "w");
+    if (file == NULL) {
+        fprintf(stderr, "Failed to create file\n");
+        return;
+    }
+    fprintf(file, "Current Registers\n");
+    fprintf(file, "Address Value\n");
+    for (int i = 0 ; i <= 4; i += 2) {
+        fprintf(file, "0x300%d    %6.1f\n", i, prev_values[i]);
+    }
+    fprintf(file, "[Current Avg] 0x3010 : %6.1f\n\n", totalCurrent);
+    fprintf(file, "Voltage Registers\n");
+    fprintf(file, "Address Value\n");
+    for (int i = 0 ; i <= 4; i += 2) {
+        fprintf(file, "0x302%d    %6.1f\n", i, prev_values[20+i]);
+    }
+    fprintf(file, "[Voltage Avg] 0x3026 : %6.1f\n", totalVoltage);
+    fclose(file);
+}
+
+void updateTotalValue(modbus_t *ctx, float *prev_values) {
+    int rc = modbus_write_register(ctx, 10, totalCurrent);
+    if (rc == -1) {
+        fprintf(stderr, "Total Current update failed to notify controller: %s\n", modbus_strerror(errno));
+    } else {
+        printf("Controller notified: Register %d updated to %.1f\n", 3010, totalCurrent); //Need to be commented
+    }
+    rc = modbus_write_register(ctx, 26, totalVoltage);
+    if (rc == -1) {
+        fprintf(stderr, "Total Voltage update failed to notify controller: %s\n", modbus_strerror(errno));
+    } else {
+        printf("Controller notified: Register %d updated to %.1f\n", 3026, totalVoltage); //Need to be commented
+    }
+    prev_values[10] = totalCurrent;
+    prev_values[26] = totalVoltage;
 }
 
 int main(int argc, char* argv[]) {
@@ -166,14 +222,20 @@ int main(int argc, char* argv[]) {
 
     printf("%s is activating..!\n", SIMULATOR);
 
-    initialize_registers(prev_values, PV_FILE, PV_INVERTER);
-    initialize_registers(prev_values, EV_FILE, EV_CHARGER);
-    initialize_registers(prev_values, HP_FILE, HEAT_PUMP);
-    initialize_file(prev_values);
-    printf("Initialized registers with files from simulators and generated one file for Substation.\n");
-
     // Modbus TCP connection to the controller
     modbus_t *ctx = initialize_modbus(CONTROLLER_IP, MODBUS_PORT);
+
+    initialize_registers(prev_values, PV_FILE, PV_INVERTER, ctx);
+    initialize_registers(prev_values, EV_FILE, EV_CHARGER, ctx);
+    initialize_registers(prev_values, HP_FILE, HEAT_PUMP, ctx);
+    updateTotalValue(ctx, prev_values);
+    initialize_file(prev_values);
+    printf("Initialized registers with files from simulators and generated one file for Substation.\n\n");
+    printf("Registers print.\n");
+    for (int i = 0; i <NUM_REGISTERS; i++) {
+        printf("%d : %f\n", 3000+i, prev_values[i]);
+    }
+
     if (ctx == NULL) {
         return -1;
     }
