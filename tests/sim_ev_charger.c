@@ -164,10 +164,10 @@ void initialize_file(void) {
     }
     fprintf(file, "Current Register\n");
     fprintf(file, "Address Value\n");
-    fprintf(file, "0x%4d    %6.1f\n\n", 3002, 10.0);
+    fprintf(file, "0x%4d    %6.1f\n\n", 3004, 10.0);
     fprintf(file, "Voltage Register\n");
     fprintf(file, "Address Value\n");
-    fprintf(file, "0x%4d    %6.1f\n", 3022, 100.0);
+    fprintf(file, "0x%4d    %6.1f\n", 3024, 100.0);
     fclose(file);
 }
 
