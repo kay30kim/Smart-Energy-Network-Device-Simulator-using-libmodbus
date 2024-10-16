@@ -197,7 +197,6 @@ void power_generation_process(void) {
     fclose(file);
 }
 
-
 int main(int argc, char* argv[]) {
     pid_t pid = fork();
 
