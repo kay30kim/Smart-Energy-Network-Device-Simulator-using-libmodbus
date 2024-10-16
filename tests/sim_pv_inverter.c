@@ -14,6 +14,7 @@
 #define NUM_REGISTERS 30
 #define SIMULATOR "PV Inverter"
 #define TEST_CASE_FILE_NAME "sim_pv_test_case1_normal.txt"
+#define PV_INVERTER_CURRENT_ADDRESS_REGISTER 3002
 
 // Prototypes
 int set_backend_simulation(int argc, char* argv[]);
@@ -167,7 +168,7 @@ void initialize_file(void) {
     }
     fprintf(file, "Current Register\n");
     fprintf(file, "Address Value\n");
-    fprintf(file, "0x%4d    %6.1f\n\n", 3002, 10.0);
+    fprintf(file, "0x%4d    %6.1f\n\n", PV_INVERTER_CURRENT_ADDRESS_REGISTER, 10.0);
     fprintf(file, "Voltage Register\n");
     fprintf(file, "Address Value\n");
     fprintf(file, "0x%4d    %6.1f\n", 3022, 100.0);
@@ -188,7 +189,7 @@ void power_generation_process(void) {
     // skip the header line
     while (fgets(buffer, sizeof(buffer), file)) {
         if (sscanf(buffer, "%d:00    %f", &hour, &power) == 2) {
-            update_file(3002, power);
+            update_file(PV_INVERTER_CURRENT_ADDRESS_REGISTER, power);
             printf("Time: %2d:00 - Generated Power : %.1f\n", hour, power);
         }
         sleep(1);
