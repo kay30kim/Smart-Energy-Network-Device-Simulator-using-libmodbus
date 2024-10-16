@@ -192,7 +192,7 @@ void power_generation_process(void) {
             update_file(PV_INVERTER_CURRENT_ADDRESS_REGISTER, power);
             printf("Time: %2d:00 - Generated Power : %.1f\n", hour, power);
         }
-        sleep(1);
+        sleep(5);
     }
     fclose(file);
 }

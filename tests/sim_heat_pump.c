@@ -11,7 +11,7 @@
 
 #define SERVER_ID 1
 #define FILE_NAME "heat_pump_registers.txt"
-#define NUM_REGISTERS 2
+#define NUM_REGISTERS 30
 #define SIMULATOR "Heat Pump"
 #define TEST_CASE_FILE_NAME "sim_heat_test_case1_airconditioner.txt"
 #define HEAT_PUMP_CURRENT_ADDRESS_REGISTER 3006
@@ -192,7 +192,7 @@ void power_generation_process(void) {
             update_file(HEAT_PUMP_CURRENT_ADDRESS_REGISTER, power);
             printf("Time: %2d:00 - Generated Power : %.1f\n", hour, power);
         }
-        sleep(1);
+        sleep(5);
     }
     fclose(file);
 }
@@ -270,7 +270,7 @@ int main(int argc, char* argv[]) {
                     mb_mapping->tab_registers[address] = (uint16_t)value;  // Update the register value
                     printf("Updated register %d with value: %6.1f\n", address, value);
                     // Update the file with the new register value
-                    update_file(address, value);
+                    update_file(address + 3000, value);
                 } else if (query[header_length] == 0x05) {  // MODBUS_FC_WRITE_SINGLE_COIL
                     int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
                     uint8_t value = query[header_length + 4];
