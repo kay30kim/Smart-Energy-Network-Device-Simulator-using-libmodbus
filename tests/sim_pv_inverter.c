@@ -307,7 +307,7 @@ int main(int argc, char* argv[]) {
             modbus_free(ctx);
             printf("\n");
 
-            wait(NULL);
+            // wait(NULL);
         }
     } else {
         fprintf(stderr, "Fork failed\n");

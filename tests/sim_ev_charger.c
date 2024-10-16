@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #define SERVER_ID 3
 #define FILE_NAME "ev_charger_registers.txt"
@@ -306,7 +307,11 @@ int main(int argc, char* argv[]) {
             modbus_close(ctx);
             modbus_free(ctx);
             printf("\n");
+            // wait(NULL);
         }
+    } else {
+        fprintf(stderr, "Fork failed\n");
+        exit(1);
     }
     return 0;
 }
