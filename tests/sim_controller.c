@@ -66,7 +66,16 @@ int main(void) {
                 fprintf(stderr, "Failed to reply: %s\n", modbus_strerror(errno));
                 break;
             }
+            int header_length = modbus_get_header_length(ctx);  // Set the header length for the protocol
 
+            if (query[header_length] == 0x06) {  // MODBUS_FC_WRITE_SINGLE_REGISTER
+                int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
+                float value = (float)(MODBUS_GET_INT16_FROM_INT8(query, header_length + 4)) / 256;
+                // printf("Current register value at %d: %d\n", address, mb_mapping->tab_registers[address]);
+                mb_mapping->tab_registers[address] = (uint16_t)value;  // Update the register value
+                // printf("Updated register %d with value: %6.1f\n", address, value);
+                // TO DO LIST : Need to check how they control 
+            }
             // Print updated registers
             printf("All registers\n");
             for (int i = 0; i < NUM_REGISTERS; i++) {
