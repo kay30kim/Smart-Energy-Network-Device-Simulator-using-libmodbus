@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/prctl.h>
 
 #define SERVER_ID 1
 #define FILE_NAME "pv_inverter_registers.txt"
@@ -201,6 +202,7 @@ int main(int argc, char* argv[]) {
     pid_t pid = fork();
 
     if (pid == 0) { // Child Process - Power generation by txt file
+        prctl(PR_SET_PDEATHSIG,SIGTERM);
         power_generation_process();
     } else if (pid > 0) {
         int socket_file_descriptor = -1;
