@@ -1,5 +1,5 @@
 /*
- * PV Inverter (Server)
+ * EV Charger (Server)
  */
 #include <errno.h>
 #include <modbus.h>
