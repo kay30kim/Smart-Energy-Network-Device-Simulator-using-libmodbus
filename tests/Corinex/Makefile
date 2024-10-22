@@ -16,7 +16,7 @@ BINDIR = ./bin
 
 # Source files for different components
 DEVICES_SRCS = EVChargerServer.cpp HeatPumpServer.cpp PVInverterServer.cpp
-MODBUS_SRCS = ModbusServer.cpp ModbusServerFactory.cpp ModbusSimulationEnvironment.cpp
+MODBUS_SRCS = ModbusServer.cpp ModbusSimulationEnvironment.cpp FileUpdaterSingleton.cpp
 TESTCASE_SRCS = TestCase.cpp TestMain.cpp
 
 # Add prefixes to source files and create object file list

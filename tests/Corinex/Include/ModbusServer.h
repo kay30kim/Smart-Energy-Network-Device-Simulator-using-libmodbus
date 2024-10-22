@@ -3,29 +3,36 @@
 
 #include <iostream>
 #include <modbus.h>
-#include <fstream>
+#include "ModbusConstants.h"
 
 class ModbusServer {
 protected:
-    std::string inputFile;  // 읽을 파일
-    std::string outputFile; // 업데이트할 파일
+    std::string inputFile;
+    std::string outputFile;
     std::string fileName;
     modbus_t* ctx;
+    modbus_mapping_t* mb_mapping;
+    const char* port;
+    const char* ip_or_device;
+    uint8_t query[MODBUS_TCP_MAX_ADU_LENGTH];  // Buffer for receiving Modbus requests
+    int rc;
+    int header_length;
+    int use_backend;
 
 public:
-    void initializeFile();
-    virtual void startServer(const std::string& inputFile, const std::string& outputFile); // configFile 인자를 추가    virtual void initializeFile();
-    virtual void initializeRegisterData(std::ofstream& file) = 0;
-    virtual void powerGenerationProcess();
-    virtual void processPowerData() = 0;  // 각 서버의 전력 데이터를 처리하는 추상 메서드
-    virtual void generatePowerData() = 0;
-    virtual void setupServerSimulation() = 0;
-    virtual std::string getSimulatorName() = 0;
+    ModbusServer();
+    modbus_t* initialize_modbus_context_simulation();
+    void setupServerSimulation(int use_backend, const char* ip_or_device, const char* port);
+    const char* set_ip_or_device_simulation(int use_backend, const char* ip_or_device);
+    int setup_server_simulation(int use_backend, modbus_t* ctx);
+    virtual void startServer(const std::string& inputFile, const std::string& outputFile) = 0;
+    virtual void initializeInputFile(const std::string& inputFile) = 0;
+    virtual void initializeOutputFile(const std::string& outputFile) = 0;
+    virtual void processPowerDataFromModbusDevice() = 0;  // Modbus Connection
     virtual ~ModbusServer();
 
 protected:
     modbus_t* getContext() { return ctx; }
-    void updateRegister(int address, float value);
 };
 
 #endif

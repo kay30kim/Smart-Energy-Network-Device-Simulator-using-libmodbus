@@ -6,12 +6,11 @@
 class HeatPumpServer : public ModbusServer {
 public:
     HeatPumpServer();
-    void initializeRegisterData(std::ofstream& file) override;
+    ~HeatPumpServer(){}
     void startServer(const std::string& inputFile, const std::string& outputFile) override;
-    void processPowerData() override;
-    void generatePowerData() override;
-    void setupServerSimulation() override;
-    std::string getSimulatorName() override;
+    void initializeInputFile(const std::string& inputFile) override;
+    void initializeOutputFile(const std::string& outputFile) override;
+    void processPowerDataFromModbusDevice() override;
 };
 
 #endif

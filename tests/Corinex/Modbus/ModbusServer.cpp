@@ -1,36 +1,96 @@
 #include "ModbusServer.h"
+#include <cstring>
+#include <string>
 
-void ModbusServer::startServer(const std::string& inputFile, const std::string& outputFile) {
-    this->inputFile = inputFile;
-    this->outputFile = outputFile;
-    std::cout << "Server Starting with input file: " << inputFile << " and output file: " << outputFile << "\n";
+ModbusServer::ModbusServer() {
+    inputFile = "";
+    outputFile = "";
+    fileName = "Modbus Server";
+    port = NULL;
+    ctx = NULL;
+    mb_mapping = NULL;
+    ip_or_device = NULL;
+    memset(query, 0, sizeof(query));
+    rc = 0;
+    header_length = 0;
+    use_backend = -1;
 }
 
-void ModbusServer::initializeFile() {
-    std::ofstream file(fileName);
-    if (!file.is_open()) {
-        std::cerr << "Failed to open file" << std::endl;
+void ModbusServer::setupServerSimulation(int use_backend, const char* ip_or_device, const char* port) {
+    int socket_file_descriptor = -1;
+    socket_file_descriptor = modbus_tcp_listen(ctx, 1);
+    if (socket_file_descriptor == -1) {
+        std::cerr << "Failed to listen: " << modbus_strerror(errno) << std::endl;
         return;
     }
+    this->use_backend = use_backend;
+    this->ip_or_device = set_ip_or_device_simulation(use_backend, ip_or_device);
+    this->port = port;
 
-    file << "Register Address   Value\n";
-    initializeRegisterData(file);
-    file.close();
-}
-
-void ModbusServer::powerGenerationProcess() {
-    std::cout << "Starting power generation for " << getSimulatorName() << std::endl;
-    generatePowerData();
-}
-
-void ModbusServer::updateRegister(int address, float value) {
-    std::ofstream file(outputFile, std::ios_base::app);  // append 모드로 기록
-    if (!file.is_open()) {
-        std::cerr << "Can't open output file: " << outputFile << std::endl;
-        return;
+    if (use_backend < TCP || use_backend > RTU || ip_or_device == NULL) {
+        printf("Put right backend or IP\n");
+        return ;
     }
-    file << "0x" << std::hex << address << "    " << std::dec << value << std::endl;
-    file.close();
+}
+
+// Function to set the IP address or device based on the selected backend
+const char* ModbusServer::set_ip_or_device_simulation(int use_backend, const char* ip_or_device) {
+    if (ip_or_device) {
+        return ip_or_device;  // User-provided IP or device
+    }
+
+    // if ip_or_devices is NULL -> default setting
+    switch (use_backend) {
+        case TCP:
+            return "127.0.0.1";
+        case TCP_PI:
+            return "::1";
+        case RTU:
+            return "/dev/ttyUSB0";
+        default:
+            return NULL;
+    }
+}
+
+modbus_t* ModbusServer::initialize_modbus_context_simulation() {
+    modbus_t* ctx = nullptr;
+    if (use_backend == TCP) {
+        ctx = modbus_new_tcp(ip_or_device, std::stoi(port));
+    } else if (use_backend == TCP_PI) {
+        ctx = modbus_new_tcp_pi(ip_or_device, port);
+    } else {
+        ctx = modbus_new_rtu(ip_or_device, std::stoi(port), 'N', 8, 1);
+        modbus_set_slave(ctx, SERVER_ID);
+    }
+    return ctx;
+}
+
+// Set up the Modbus server for communication
+int ModbusServer::setup_server_simulation(int use_backend, modbus_t* ctx) {
+    int socket_file_descriptor = -1;
+    if (use_backend == TCP) {
+        socket_file_descriptor = modbus_tcp_listen(ctx, 1);
+        if (socket_file_descriptor == -1) {
+            fprintf(stderr, "Failed to listen: %s\n", modbus_strerror(errno));
+            return -1;
+        }
+        int tmp = modbus_tcp_accept(ctx, &socket_file_descriptor);
+        if (tmp == -1) {
+            fprintf(stderr, "Error in modbus_tcp_accept: %s\n", modbus_strerror(errno));
+            return -1;
+        }
+    } else if (use_backend == TCP_PI) {
+        socket_file_descriptor = modbus_tcp_pi_listen(ctx, 1);
+        modbus_tcp_pi_accept(ctx, &socket_file_descriptor);
+    } else {
+        int rc = modbus_connect(ctx);
+        if (rc == -1) {
+            fprintf(stderr, "Unable to connect: %s\n", modbus_strerror(errno));
+            modbus_free(ctx);
+            return -1;
+        }
+    }
+    return socket_file_descriptor;
 }
 
 ModbusServer::~ModbusServer() {
