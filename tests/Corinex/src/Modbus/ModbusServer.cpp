@@ -5,7 +5,6 @@
 ModbusServer::ModbusServer() {
     port = NULL;
     ctx = NULL;
-    mb_mapping = NULL;
     ip_or_device = NULL;
     memset(query, 0, sizeof(query));
     rc = 0;

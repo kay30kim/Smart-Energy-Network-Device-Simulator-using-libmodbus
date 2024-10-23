@@ -6,12 +6,26 @@
 PVInverterServer::PVInverterServer() {
     inputFile = "";
     outputFile = "";
+    mb_mapping = NULL;
 }
 
 void PVInverterServer::startServer(const std::string& inputFile, const std::string& outputFile) {
     std::cout << "PV Inverter Server Running...\n";
     initializeInputFile(inputFile);
     initializeOutputFile(outputFile);
+
+    // Initialize Modbus mapping for registers
+    mb_mapping = modbus_mapping_new_start_address(0, 0, 0, 0, 0, NUM_REGISTERS, 0, 0);
+    if (mb_mapping == NULL) {
+        fprintf(stderr, "Failed to allocate the mapping: %s\n", modbus_strerror(errno));
+        modbus_free(ctx);
+        return ;
+    }
+
+    // Initialize all registers to 10
+    for (int i = 0; i < NUM_REGISTERS; i++) {
+        mb_mapping->tab_registers[i] = 10;
+    }
 }
 
 void PVInverterServer::initializeInputFile(const std::string& inputFile) {
@@ -56,14 +70,6 @@ void PVInverterServer::processPowerDataFromModbusDevice() {
         // Set debug mode for logging
         modbus_set_debug(ctx, TRUE);
 
-        // Initialize Modbus mapping for registers
-        mb_mapping = modbus_mapping_new_start_address(0, 0, 0, 0, 0, NUM_REGISTERS, 0, 0);
-        if (mb_mapping == NULL) {
-            fprintf(stderr, "Failed to allocate the mapping: %s\n", modbus_strerror(errno));
-            modbus_free(ctx);
-            return ;
-        }
-
         // Set up the server
         socket_file_descriptor = setup_server_simulation(use_backend, ctx);
         if (socket_file_descriptor == -1) {
@@ -74,11 +80,6 @@ void PVInverterServer::processPowerDataFromModbusDevice() {
         }
 
         header_length = modbus_get_header_length(ctx);  // Set the header length for the protocol
-
-        // Initialize all registers to 10
-        for (int i = 0; i < NUM_REGISTERS; i++) {
-            mb_mapping->tab_registers[i] = 10;
-        }
 
         // Main loop for handling Modbus requests
         for (;;) {

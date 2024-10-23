@@ -7,6 +7,7 @@ class PVInverterServer : public ModbusServer {
 private:
     std::string inputFile;
     std::string outputFile;
+    modbus_mapping_t* mb_mapping;
 public:
     PVInverterServer();
     ~PVInverterServer(){}

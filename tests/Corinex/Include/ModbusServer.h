@@ -8,7 +8,6 @@
 class ModbusServer {
 protected:
     modbus_t* ctx;
-    modbus_mapping_t* mb_mapping;
     const char* port;
     const char* ip_or_device;
     uint8_t query[MODBUS_TCP_MAX_ADU_LENGTH];  // Buffer for receiving Modbus requests
