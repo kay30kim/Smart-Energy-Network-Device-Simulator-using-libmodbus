@@ -95,10 +95,12 @@ void HeatPumpServer::processPowerDataFromModbusDevice() {
             // Handle register update requests (single register, multiple registers)
             if (query[header_length] == 0x06) {  // MODBUS_FC_WRITE_SINGLE_REGISTER
                 int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
-                float value = (float)(MODBUS_GET_INT16_FROM_INT8(query, header_length + 4)) / 256;
+                // TODO : the value takes the input * 256 because it is Big Endian so it takes MSB first.
+                // It need to be changed in the client side.
+                uint16_t value = (float)(MODBUS_GET_INT16_FROM_INT8(query, header_length + 4)) / 256;
                 printf("Current register value at %d: %d\n", address, mb_mapping->tab_registers[address]);
-                mb_mapping->tab_registers[address] = (uint16_t)value;  // Update the register value
-                printf("Updated register %d with value: %6.1f\n", address, value);
+                mb_mapping->tab_registers[address] = value;  // Update the register value
+                printf("Updated register %d with value: %d\n", address, value);
                 // Update the file with the new register value
                 FileUpdaterSingleton::getInstance().updateFile(outputFile, address + 3000, value);
             } else if (query[header_length] == 0x05) {  // MODBUS_FC_WRITE_SINGLE_COIL
