@@ -29,7 +29,7 @@ OBJS = $(DEVICES_OBJS) $(MODBUS_OBJS) $(TESTCASE_OBJS)
 TARGET = $(BINDIR)/modbus_simulation
 
 # Libraries or dependencies needed
-LIBS = ../../src/libmodbus.la
+LIBS = -L../../src/.libs -lmodbus
 
 # Default target: build all
 all: $(TARGET)
@@ -40,7 +40,7 @@ $(OBJDIR) $(BINDIR):
 
 # Rule to build the target executable
 $(TARGET): $(OBJS) | $(BINDIR)
-	libtool --mode=link $(CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LIBS) -lpthread 
+	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LIBS) -lpthread 
 
 # Pattern rule for compiling .cpp files into .o files
 $(OBJDIR)/%.o: $(DEVICES_SRCDIR)/%.cpp | $(OBJDIR)
@@ -59,3 +59,5 @@ clean:
 
 # Rebuild: clean and build again
 re: clean all
+
+.PHONY: all clean re
