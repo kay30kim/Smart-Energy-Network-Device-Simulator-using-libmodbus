@@ -4,9 +4,7 @@ CFLAGS = -Wall -g
 INCLUDE = -I./Include -I../../src
 
 # Directories
-DEVICES_SRCDIR = ./Devices
-MODBUS_SRCDIR = ./Modbus
-TESTCASE_SRCDIR = ./TestCase
+SRCDIR = ./src
 OBJDIR = ./obj
 
 # # Modbus library object files
@@ -18,11 +16,11 @@ DEVICES_SRCS = EVChargerServer.cpp HeatPumpServer.cpp PVInverterServer.cpp
 MODBUS_SRCS = ModbusServer.cpp ModbusSimulationEnvironment.cpp FileUpdaterSingleton.cpp
 TESTCASE_SRCS = TestCase.cpp TestMain.cpp
 
-# Add prefixes to source files and create object file list
-DEVICES_OBJS = $(addprefix $(OBJDIR)/, $(DEVICES_SRCS:.cpp=.o))
-MODBUS_OBJS = $(addprefix $(OBJDIR)/, $(MODBUS_SRCS:.cpp=.o))
-TESTCASE_OBJS = $(addprefix $(OBJDIR)/, $(TESTCASE_SRCS:.cpp=.o))
-OBJS = $(DEVICES_OBJS) $(MODBUS_OBJS) $(TESTCASE_OBJS)
+# Recursive function to get all .cpp files from subdirectories
+SRC_SUBDIRS := $(shell find $(SRCDIR) -type d)
+SRCS := $(foreach dir, $(SRC_SUBDIRS), $(wildcard $(dir)/*.cpp))
+OBJS := $(patsubst $(SRCDIR)/%, $(OBJDIR)/%, $(SRCS:.cpp=.o))
+OBJDIRS := $(patsubst $(SRCDIR)/%, $(OBJDIR)/%, $(SRC_SUBDIRS))
 
 # Final executable
 TARGET = modbus_simulation
@@ -37,18 +35,15 @@ all: $(TARGET)
 $(OBJDIR):
 	mkdir -p $@
 
+$(OBJDIRS):
+	mkdir -p $@
+
 # Rule to build the target executable
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LIBS) -lpthread 
 
 # Pattern rule for compiling .cpp files into .o files
-$(OBJDIR)/%.o: $(DEVICES_SRCDIR)/%.cpp | $(OBJDIR)
-	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
-
-$(OBJDIR)/%.o: $(MODBUS_SRCDIR)/%.cpp | $(OBJDIR)
-	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
-
-$(OBJDIR)/%.o: $(TESTCASE_SRCDIR)/%.cpp | $(OBJDIR)
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 # Clean rule to remove object and executable files
