@@ -55,6 +55,7 @@ $(OBJDIR)/%.o: $(TESTCASE_SRCDIR)/%.cpp | $(OBJDIR)
 # Clean rule to remove object and executable files
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
+	rm -f *output.txt
 
 # Rebuild: clean and build again
 re: clean all

@@ -1,7 +1,0 @@
-Current Register
-Address Value
-0x3002      10.0
-
-Voltage Register
-Address Value
-0x3022     100.0

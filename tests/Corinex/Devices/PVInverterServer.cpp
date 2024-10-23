@@ -20,13 +20,13 @@ void PVInverterServer::initializeInputFile(const std::string& inputFile) {
 void PVInverterServer::initializeOutputFile(const std::string& outputFile) {
     std::cout << "Initializing output file: " << outputFile << std::endl;
     // Try to open the file in read mode
-    FILE *file_read = fopen(inputFile.c_str(), "r");
+    FILE *file_read = fopen(outputFile.c_str(), "r");
     if (file_read != NULL) {
         // File exists, so we close it and do nothing
         fclose(file_read);
         return;
     }
-    FILE *file = fopen(inputFile.c_str(), "w");
+    FILE *file = fopen(outputFile.c_str(), "w");
     if (file == NULL) {
         fprintf(stderr, "Failed to create file\n");
         return;
