@@ -3,9 +3,6 @@
 #include <string>
 
 ModbusServer::ModbusServer() {
-    inputFile = "";
-    outputFile = "";
-    fileName = "Modbus Server";
     port = NULL;
     ctx = NULL;
     mb_mapping = NULL;

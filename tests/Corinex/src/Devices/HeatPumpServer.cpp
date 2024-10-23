@@ -4,7 +4,8 @@
 #include <fstream>
 
 HeatPumpServer::HeatPumpServer() {
-    fileName = "heat_pump_registers.txt";
+    inputFile = "";
+    outputFile = "";
 }
 
 void HeatPumpServer::startServer(const std::string& inputFile, const std::string& outputFile) {
@@ -15,11 +16,13 @@ void HeatPumpServer::startServer(const std::string& inputFile, const std::string
 
 void HeatPumpServer::initializeInputFile(const std::string& inputFile) {
     std::cout << "Initializing input file: " << inputFile << std::endl;
+    this->inputFile = inputFile;
     
 }
 
 void HeatPumpServer::initializeOutputFile(const std::string& outputFile) {
     std::cout << "Initializing output file: " << outputFile << std::endl;
+    this->outputFile = outputFile;
     // Try to open the file in read mode
     FILE *file_read = fopen(outputFile.c_str(), "r");
     if (file_read != NULL) {

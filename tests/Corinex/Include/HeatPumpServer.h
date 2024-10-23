@@ -4,6 +4,9 @@
 #include "ModbusServer.h"
 
 class HeatPumpServer : public ModbusServer {
+private:
+    std::string inputFile;
+    std::string outputFile;
 public:
     HeatPumpServer();
     ~HeatPumpServer(){}

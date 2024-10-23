@@ -4,7 +4,8 @@
 #include <fstream>
 
 PVInverterServer::PVInverterServer() {
-    fileName = "pv_inverter_registers.txt";
+    inputFile = "";
+    outputFile = "";
 }
 
 void PVInverterServer::startServer(const std::string& inputFile, const std::string& outputFile) {
@@ -15,10 +16,12 @@ void PVInverterServer::startServer(const std::string& inputFile, const std::stri
 
 void PVInverterServer::initializeInputFile(const std::string& inputFile) {
     std::cout << "Initializing input file: " << inputFile << std::endl;
+    this->inputFile = inputFile;
 }
 
 void PVInverterServer::initializeOutputFile(const std::string& outputFile) {
     std::cout << "Initializing output file: " << outputFile << std::endl;
+    this->outputFile = outputFile;
     // Try to open the file in read mode
     FILE *file_read = fopen(outputFile.c_str(), "r");
     if (file_read != NULL) {

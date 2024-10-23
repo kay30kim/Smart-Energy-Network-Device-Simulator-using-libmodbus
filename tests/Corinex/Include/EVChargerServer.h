@@ -4,6 +4,9 @@
 #include "ModbusServer.h"
 
 class EVChargerServer : public ModbusServer {
+private:
+    std::string inputFile;
+    std::string outputFile;
 public:
     EVChargerServer();
     ~EVChargerServer(){}

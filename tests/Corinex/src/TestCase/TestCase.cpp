@@ -27,7 +27,7 @@ void runTestCase1(ModbusSimulationEnvironment& simulation) {
 
     ModbusServer* pvInverter = new PVInverterServer();
     pvInverter->startServer(TEST_CASE1_INPUT3, TEST_CASE1_OUTPUT3);
-    pvInverter->setupServerSimulation(TCP, "192.168.0.1", "1502");
+    pvInverter->setupServerSimulation(TCP, "192.168.0.54", "1502");
 
     simulation.addServer(evCharger);
     simulation.addServer(heatPump);

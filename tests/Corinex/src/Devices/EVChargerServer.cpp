@@ -4,7 +4,8 @@
 #include <fstream>
 
 EVChargerServer::EVChargerServer() {
-    fileName = "ev_charger_registers.txt";
+    inputFile = "";
+    outputFile = "";
 }
 
 void EVChargerServer::startServer(const std::string& inputFile, const std::string& outputFile) {
@@ -15,11 +16,13 @@ void EVChargerServer::startServer(const std::string& inputFile, const std::strin
 
 void EVChargerServer::initializeInputFile(const std::string& inputFile){
     std::cout << "Initializing input file: " << inputFile << std::endl;
+    this->inputFile = inputFile;
     
 }
 
 void EVChargerServer::initializeOutputFile(const std::string& outputFile) {
     std::cout << "Initializing output file: " << outputFile << std::endl;
+    this->outputFile = outputFile;
     // Try to open the file in read mode
     FILE *file_read = fopen(outputFile.c_str(), "r");
     if (file_read != NULL) {

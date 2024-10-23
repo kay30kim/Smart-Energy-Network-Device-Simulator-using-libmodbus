@@ -7,9 +7,6 @@
 
 class ModbusServer {
 protected:
-    std::string inputFile;
-    std::string outputFile;
-    std::string fileName;
     modbus_t* ctx;
     modbus_mapping_t* mb_mapping;
     const char* port;

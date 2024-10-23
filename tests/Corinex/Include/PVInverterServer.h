@@ -4,6 +4,9 @@
 #include "ModbusServer.h"
 
 class PVInverterServer : public ModbusServer {
+private:
+    std::string inputFile;
+    std::string outputFile;
 public:
     PVInverterServer();
     ~PVInverterServer(){}
