@@ -24,7 +24,6 @@ void EVChargerServer::initializeOutputFile(const std::string& outputFile) {
     FILE *file_read = fopen(outputFile.c_str(), "r");
     if (file_read != NULL) {
         // File exists, so we close it and do nothing
-        printf("exist\n");
         fclose(file_read);
         return;
     }

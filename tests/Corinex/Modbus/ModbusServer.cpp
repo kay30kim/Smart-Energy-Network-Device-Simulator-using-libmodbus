@@ -17,12 +17,6 @@ ModbusServer::ModbusServer() {
 }
 
 void ModbusServer::setupServerSimulation(int use_backend, const char* ip_or_device, const char* port) {
-    int socket_file_descriptor = -1;
-    socket_file_descriptor = modbus_tcp_listen(ctx, 1);
-    if (socket_file_descriptor == -1) {
-        std::cerr << "Failed to listen: " << modbus_strerror(errno) << std::endl;
-        return;
-    }
     this->use_backend = use_backend;
     this->ip_or_device = set_ip_or_device_simulation(use_backend, ip_or_device);
     this->port = port;
