@@ -8,7 +8,6 @@ DEVICES_SRCDIR = ./Devices
 MODBUS_SRCDIR = ./Modbus
 TESTCASE_SRCDIR = ./TestCase
 OBJDIR = ./obj
-BINDIR = ./bin
 
 # # Modbus library object files
 # MODBUS_LIB_SRCS = modbus.lo modbus-data.lo modbus-rtu.lo modbus-tcp.lo
@@ -26,7 +25,7 @@ TESTCASE_OBJS = $(addprefix $(OBJDIR)/, $(TESTCASE_SRCS:.cpp=.o))
 OBJS = $(DEVICES_OBJS) $(MODBUS_OBJS) $(TESTCASE_OBJS)
 
 # Final executable
-TARGET = $(BINDIR)/modbus_simulation
+TARGET = modbus_simulation
 
 # Libraries or dependencies needed
 LIBS = -L../../src/.libs -lmodbus
@@ -35,11 +34,11 @@ LIBS = -L../../src/.libs -lmodbus
 all: $(TARGET)
 
 # Rule to create directories if they don't exist
-$(OBJDIR) $(BINDIR):
+$(OBJDIR):
 	mkdir -p $@
 
 # Rule to build the target executable
-$(TARGET): $(OBJS) | $(BINDIR)
+$(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LIBS) -lpthread 
 
 # Pattern rule for compiling .cpp files into .o files
@@ -54,7 +53,7 @@ $(OBJDIR)/%.o: $(TESTCASE_SRCDIR)/%.cpp | $(OBJDIR)
 
 # Clean rule to remove object and executable files
 clean:
-	rm -rf $(OBJDIR) $(BINDIR)
+	rm -rf $(OBJDIR)
 	rm -f *output.txt
 
 # Rebuild: clean and build again
