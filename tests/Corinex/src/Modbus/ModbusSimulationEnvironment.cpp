@@ -9,8 +9,14 @@ void ModbusSimulationEnvironment::addServer(ModbusServer* server) {
 
 void ModbusSimulationEnvironment::runServers() {
     for (ModbusServer* server : servers) {
-        std::thread t(&ModbusServer::processPowerDataFromModbusDevice, server);
-        t.join();
+        threads.emplace_back(&ModbusServer::processPowerDataFromModbusDevice, server);
+    }
+
+    // wait until all threads finish
+    for (std::thread &t : threads) {
+        if (t.joinable()) {
+            t.join();
+        }
     }
 }
 

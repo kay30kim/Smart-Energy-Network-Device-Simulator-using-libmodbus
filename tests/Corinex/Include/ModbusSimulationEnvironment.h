@@ -8,7 +8,7 @@
 class ModbusSimulationEnvironment {
 private:
     std::vector<ModbusServer*> servers;
-    // std::vector<std::thread> threads; // not use now
+    std::vector<std::thread> threads;
 
 public:
     void addServer(ModbusServer* server);
