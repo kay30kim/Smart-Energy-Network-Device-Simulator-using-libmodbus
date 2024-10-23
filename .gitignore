@@ -59,3 +59,6 @@ tests/pv_inverter_registers.txt
 tests/ev_charger_registers.txt
 tests/heat_pump_registers.txt
 tests/substation_registers.txt
+
+*output.txt
+modbus_simulation
