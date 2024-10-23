@@ -7,7 +7,7 @@ class FileUpdaterSingleton {
 public:
     static FileUpdaterSingleton& getInstance();
 
-    void updateFile(const std::string& file_name, int address, float value);
+    void updateFile(const std::string& file_name, int address, u_int16_t value);
 
 private:
     FileUpdaterSingleton();

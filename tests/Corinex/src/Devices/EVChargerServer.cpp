@@ -51,10 +51,10 @@ void EVChargerServer::initializeOutputFile(const std::string& outputFile) {
     }
     fprintf(file, "Current Register\n");
     fprintf(file, "Address Value\n");
-    fprintf(file, "0x%4d    %6.1f\n\n", EV_CHARGER_CURRENT_ADDRESS_REGISTER, 10.0);
+    fprintf(file, "0x%4d    %4d\n\n", EV_CHARGER_CURRENT_ADDRESS_REGISTER, 10);
     fprintf(file, "Voltage Register\n");
     fprintf(file, "Address Value\n");
-    fprintf(file, "0x%4d    %6.1f\n", HEAT_PUMP_VOLTAGE_ADDRESS_REGISTER, 100.0);
+    fprintf(file, "0x%4d    %4d\n", HEAT_PUMP_VOLTAGE_ADDRESS_REGISTER, 100);
     fclose(file);
 }
 
@@ -95,9 +95,11 @@ void EVChargerServer::processPowerDataFromModbusDevice() {
             // Handle register update requests (single register, multiple registers)
             if (query[header_length] == 0x06) {  // MODBUS_FC_WRITE_SINGLE_REGISTER
                 int address = MODBUS_GET_INT16_FROM_INT8(query, header_length + 1);
-                float value = (float)(MODBUS_GET_INT16_FROM_INT8(query, header_length + 4)) / 256;
+                // TODO : the value takes the input * 256 because it is Big Endian so it takes MSB first.
+                // It need to be changed in the client side.
+                uint16_t value = (MODBUS_GET_INT16_FROM_INT8(query, header_length + 4)) / 256;
                 printf("Current register value at %d: %d\n", address, mb_mapping->tab_registers[address]);
-                mb_mapping->tab_registers[address] = (uint16_t)value;  // Update the register value
+                mb_mapping->tab_registers[address] = value;  // Update the register value
                 printf("Updated register %d with value: %6.1f\n", address, value);
                 // Update the file with the new register value
                 FileUpdaterSingleton::getInstance().updateFile(outputFile, address + 3000, value);
@@ -132,10 +134,9 @@ void EVChargerServer::processPowerDataFromModbusDevice() {
                 close(socket_file_descriptor);
             }
         }
-        modbus_mapping_free(mb_mapping);
         modbus_close(ctx);
         modbus_free(ctx);
         printf("\n");
-        // wait(NULL);
     }
+    modbus_mapping_free(mb_mapping);
 }

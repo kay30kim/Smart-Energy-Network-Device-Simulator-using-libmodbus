@@ -97,7 +97,7 @@ void PVInverterServer::processPowerDataFromModbusDevice() {
                 float value = (float)(MODBUS_GET_INT16_FROM_INT8(query, header_length + 4)) / 256;
                 printf("Current register value at %d: %d\n", address, mb_mapping->tab_registers[address]);
                 mb_mapping->tab_registers[address] = (uint16_t)value;  // Update the register value
-                printf("Updated register %d with value: %6.1f\n", address, value);
+                printf("Updated register %d with value: %d\n", address, value);
                 // Update the file with the new register value
                 FileUpdaterSingleton::getInstance().updateFile(outputFile, address + 3000, value);
             } else if (query[header_length] == 0x05) {  // MODBUS_FC_WRITE_SINGLE_COIL
@@ -131,11 +131,10 @@ void PVInverterServer::processPowerDataFromModbusDevice() {
                 close(socket_file_descriptor);
             }
         }
-        modbus_mapping_free(mb_mapping);
         modbus_close(ctx);
         modbus_free(ctx);
         printf("\n");
-        // wait(NULL);
     }
+    modbus_mapping_free(mb_mapping);
 }
 

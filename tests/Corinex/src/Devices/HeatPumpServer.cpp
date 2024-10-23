@@ -132,10 +132,9 @@ void HeatPumpServer::processPowerDataFromModbusDevice() {
                 close(socket_file_descriptor);
             }
         }
-        modbus_mapping_free(mb_mapping);
         modbus_close(ctx);
         modbus_free(ctx);
         printf("\n");
-        // wait(NULL);
     }
+    modbus_mapping_free(mb_mapping);
 }
