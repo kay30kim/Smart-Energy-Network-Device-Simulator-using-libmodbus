@@ -94,6 +94,7 @@ noinst_PROGRAMS = bandwidth-server-one$(EXEEXT) \
 	random-test-server$(EXEEXT) random-test-client$(EXEEXT) \
 	unit-test-server$(EXEEXT) unit-test-client$(EXEEXT) \
 	version$(EXEEXT) sim_pv_inverter$(EXEEXT) \
+	rtuclient$(EXEEXT) \
 	sim_substation_meter$(EXEEXT) \
 	sim_controller$(EXEEXT) \
 	sim_ev_charger$(EXEEXT) \
@@ -136,6 +137,9 @@ random_test_server_DEPENDENCIES = $(common_ldflags)
 am_sim_pv_inverter_OBJECTS = sim_pv_inverter.$(OBJEXT)
 sim_pv_inverter_OBJECTS = $(am_sim_pv_inverter_OBJECTS)
 sim_pv_inverter_DEPENDENCIES = $(common_ldflags)
+am_rtuclient_OBJECTS = rtuclient.$(OBJEXT)
+rtuclient_OBJECTS = $(am_rtuclient_OBJECTS)
+rtuclient_DEPENDENCIES = $(common_ldflags)
 am_sim_heat_pump_OBJECTS = sim_heat_pump.$(OBJEXT)
 sim_heat_pump_OBJECTS = $(am_sim_heat_pump_OBJECTS)
 sim_heat_pump_DEPENDENCIES = $(common_ldflags)
@@ -179,6 +183,7 @@ am__depfiles_remade = ./$(DEPDIR)/bandwidth-client.Po \
 	./$(DEPDIR)/random-test-client.Po \
 	./$(DEPDIR)/random-test-server.Po \
 	./$(DEPDIR)/sim_pv_inverter.Po \
+	./$(DEPDIR)/rtuclient.Po \
 	./$(DEPDIR)/sim_heat_pump.Po \
 	./$(DEPDIR)/sim_ev_charger.Po \
 	./$(DEPDIR)/sim_substation_meter.Po \
@@ -208,7 +213,7 @@ SOURCES = $(bandwidth_client_SOURCES) \
 	$(bandwidth_server_many_up_SOURCES) \
 	$(bandwidth_server_one_SOURCES) $(random_test_client_SOURCES) \
 	$(random_test_server_SOURCES) $(sim_pv_inverter_SOURCES) \
-	$(sim_heat_pump_SOURCES) \
+	$(sim_heat_pump_SOURCES) $(rtuclient_SOURCES) \
 	$(sim_controller_SOURCES) $(sim_ev_charger_SOURCES) \
 	$(sim_substation_meter_SOURCES) $(unit_test_client_SOURCES) \
 	$(unit_test_server_SOURCES) $(version_SOURCES)
@@ -216,7 +221,7 @@ DIST_SOURCES = $(bandwidth_client_SOURCES) \
 	$(bandwidth_server_many_up_SOURCES) \
 	$(bandwidth_server_one_SOURCES) $(random_test_client_SOURCES) \
 	$(random_test_server_SOURCES) $(sim_pv_inverter_SOURCES) \
-	$(sim_heat_pump_SOURCES) \
+	$(sim_heat_pump_SOURCES) $(rtuclient_SOURCES) \
 	$(sim_controller_SOURCES) $(sim_ev_charger_SOURCES) \
 	$(sim_substation_meter_SOURCES) $(unit_test_client_SOURCES) \
 	$(unit_test_server_SOURCES) $(version_SOURCES)
@@ -602,6 +607,8 @@ unit_test_client_SOURCES = unit-test-client.c unit-test.h
 unit_test_client_LDADD = $(common_ldflags)
 sim_pv_inverter_SOURCES = sim_pv_inverter.c
 sim_pv_inverter_LDADD = $(common_ldflags)
+rtuclient_SOURCES = rtuclient.c
+rtuclient_LDADD = $(common_ldflags)
 sim_heat_pump_SOURCES = sim_heat_pump.C
 sim_heat_pump_LDADD = $(common_ldflags)
 sim_ev_charger_SOURCES = sim_ev_charger.C
@@ -702,6 +709,10 @@ sim_pv_inverter$(EXEEXT): $(sim_pv_inverter_OBJECTS) $(sim_pv_inverter_DEPENDENC
 	@rm -f sim_pv_inverter$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(sim_pv_inverter_OBJECTS) $(sim_pv_inverter_LDADD) $(LIBS)
 
+rtuclient$(EXEEXT) : $(rtuclient_OBJECTS) $(rtuclient_DEPENDENCIES)
+	@rm -f rtuclient$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(rtuclient_OBJECTS) $(rtuclient_LDADD) $(LIBS)
+
 sim_heat_pump$(EXEEXT): $(sim_heat_pump_OBJECTS) $(sim_heat_pump_DEPENDENCIES)
 	@rm -f sim_heat_pump$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(sim_heat_pump_OBJECTS) $(sim_heat_pump_LDADD) $(LIBS)
@@ -742,6 +753,7 @@ include ./$(DEPDIR)/bandwidth-server-one.Po # am--include-marker
 include ./$(DEPDIR)/random-test-client.Po # am--include-marker
 include ./$(DEPDIR)/random-test-server.Po # am--include-marker
 include ./$(DEPDIR)/sim_pv_inverter.Po # am--include-marker
+include ./$(DEPDIR)/rtuclient.Po
 include ./$(DEPDIR)/sim_heat_pump.Po
 include ./$(DEPDIR)/sim_ev_charger.Po
 include ./$(DEPDIR)/sim_substation_meter.Po # am--include-marker
@@ -1088,6 +1100,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/random-test-client.Po
 	-rm -f ./$(DEPDIR)/random-test-server.Po
 	-rm -f ./$(DEPDIR)/sim_pv_inverter.Po
+	-rm -f ./$(DEPDIR)/rtuclient.Po
 	-rm -f ./$(DEPDIR)/sim_heat_pump.Po
 	-rm -f ./$(DEPDIR)/sim_ev_charger.Po
 	-rm -f ./$(DEPDIR)/sim_substation_meter.Po
@@ -1146,6 +1159,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/random-test-client.Po
 	-rm -f ./$(DEPDIR)/random-test-server.Po
 	-rm -f ./$(DEPDIR)/sim_pv_inverter.Po
+	-rm -f ./$(DEPDIR)/rtuclient.Po
 	-rm -f ./$(DEPDIR)/sim_heat_pump.Po
 	-rm -f ./$(DEPDIR)/sim_ev_charger.Po
 	-rm -f ./$(DEPDIR)/sim_substation_meter.Po
