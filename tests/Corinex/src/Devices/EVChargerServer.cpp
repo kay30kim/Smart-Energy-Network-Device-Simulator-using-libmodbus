@@ -186,3 +186,7 @@ void EVChargerServer::processPowerDataFromModbusDevice() {
     }
     modbus_mapping_free(mb_mapping);
 }
+
+void EVChargerServer::setModbusRegister(int address, uint16_t power) {
+    mb_mapping->tab_registers[address - 3000] = static_cast<uint16_t>(power);
+}

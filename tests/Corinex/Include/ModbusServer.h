@@ -25,6 +25,7 @@ public:
     virtual void initializeInputFile(const std::string& inputFile) = 0;
     virtual void initializeOutputFile(const std::string& outputFile) = 0;
     virtual void processPowerDataFromModbusDevice() = 0;  // Modbus Connection
+    virtual void setModbusRegister(int address, uint16_t power) = 0;
     virtual ~ModbusServer();
 
 protected:

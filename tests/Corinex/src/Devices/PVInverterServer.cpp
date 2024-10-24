@@ -186,3 +186,6 @@ void PVInverterServer::processPowerDataFromModbusDevice() {
     modbus_mapping_free(mb_mapping);
 }
 
+void PVInverterServer::setModbusRegister(int address, uint16_t power) {
+    mb_mapping->tab_registers[address] = static_cast<uint16_t>(power);
+}

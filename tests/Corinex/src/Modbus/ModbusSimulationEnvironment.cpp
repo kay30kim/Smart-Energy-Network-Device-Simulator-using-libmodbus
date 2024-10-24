@@ -41,6 +41,7 @@ void ModbusSimulationEnvironment::processPowerDataFromFile(const std::vector<std
         for (size_t i = 0; i < files.size(); ++i) {
             if (fgets(&buffers[i * 256], 256, files[i])) {
                 if (sscanf(&buffers[i * 256], "%d:00    %f", &hour, &power) == 2) {
+                    servers[i]->setModbusRegister(addressRegisters[i] - 3000, power);
                     FileUpdaterSingleton::getInstance().updateFile(outputFiles[i], addressRegisters[i], power);
                     printf("Time: %2d:00 - File: %s - Generated Power: %.1f\n", hour, inputFiles[i].c_str(), power);
                 }

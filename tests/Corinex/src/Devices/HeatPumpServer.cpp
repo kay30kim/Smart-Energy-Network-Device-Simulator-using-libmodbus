@@ -186,3 +186,7 @@ void HeatPumpServer::processPowerDataFromModbusDevice() {
     }
     modbus_mapping_free(mb_mapping);
 }
+
+void HeatPumpServer::setModbusRegister(int address, uint16_t power) {
+    mb_mapping->tab_registers[address - 3000] = static_cast<uint16_t>(power);
+}

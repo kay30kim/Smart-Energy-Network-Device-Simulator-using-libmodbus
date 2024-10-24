@@ -68,7 +68,7 @@ void runTestCase2(ModbusSimulationEnvironment& simulation) {
 
     ModbusServer* evCharger = new EVChargerServer();
     evCharger->startServer(TEST_CASE1_INPUT1, TEST_CASE1_OUTPUT1);
-    evCharger->setupServerSimulation(RTU, "/dev/ttyUSB0", "1502");
+    evCharger->setupServerSimulation(RTU, "/dev/ttyS0", "1502");
 
     //ModbusServer* heatPump = new HeatPumpServer();
     //heatPump->startServer(TEST_CASE1_INPUT2, TEST_CASE1_OUTPUT2);

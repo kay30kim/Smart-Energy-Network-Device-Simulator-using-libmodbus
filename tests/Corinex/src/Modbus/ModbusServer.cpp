@@ -51,6 +51,7 @@ modbus_t* ModbusServer::initialize_modbus_context_simulation() {
     } else {
         ctx = modbus_new_rtu(ip_or_device, BAURATE, 'N', 8, 1);
         modbus_set_slave(ctx, SERVER_ID);
+        modbus_set_debug(ctx,TRUE);
     }
     return ctx;
 }

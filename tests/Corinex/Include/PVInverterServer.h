@@ -15,6 +15,7 @@ public:
     void initializeInputFile(const std::string& inputFile) override;
     void initializeOutputFile(const std::string& outputFile) override;
     void processPowerDataFromModbusDevice() override;
+    void setModbusRegister(int address, uint16_t power) override;
 };
 
 #endif
