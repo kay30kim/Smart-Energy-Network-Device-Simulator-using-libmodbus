@@ -58,64 +58,11 @@ modbus_t* ModbusServer::initialize_modbus_context_simulation() {
 // Set up the Modbus server for communication
 int ModbusServer::setup_server_simulation(int use_backend, modbus_t* ctx) {
     int socket_file_descriptor = -1;
-    fd_set read_fds;  // fd set for select()
-    int max_fd;
-    struct timeval timeout;  // timeout for select()
     if (use_backend == TCP) {
-        socket_file_descriptor = modbus_tcp_listen(ctx, 5);
+        socket_file_descriptor = modbus_tcp_listen(ctx, 2);
         if (socket_file_descriptor == -1) {
             fprintf(stderr, "Failed to listen: %s\n", modbus_strerror(errno));
             return -1;
-        }
-
-        FD_ZERO(&read_fds);
-        FD_SET(socket_file_descriptor, &read_fds);
-        max_fd = socket_file_descriptor;
-
-        timeout.tv_sec = 5;
-        timeout.tv_usec = 0;
-
-        while (true) {
-            fd_set temp_fds = read_fds;
-            int activity = select(max_fd + 1, &temp_fds, NULL, NULL, &timeout);
-
-            if (activity < 0 && errno != EINTR) {
-                fprintf(stderr, "Error in select: %s\n", strerror(errno));
-                return -1;
-            }
-
-            if (activity == 0) {
-                printf("Timeout occurred, no client requests.\n");
-                continue;
-            }
-
-            // When detect client connection
-            if (FD_ISSET(socket_file_descriptor, &temp_fds)) {
-                int client_socket = modbus_tcp_accept(ctx, &socket_file_descriptor);
-                if (client_socket == -1) {
-                    fprintf(stderr, "Error in modbus_tcp_accept: %s\n", modbus_strerror(errno));
-                    return -1;
-                }
-                printf("Client connected!\n");
-                FD_SET(client_socket, &read_fds);  // add new client to socket
-                if (client_socket > max_fd) {
-                    max_fd = client_socket;
-                }
-            }
-
-            // // Handle request from client
-            // for (int fd = 0; fd <= max_fd; ++fd) {
-            //     if (FD_ISSET(fd, &temp_fds) && fd != socket_file_descriptor) {
-            //         int rc = modbus_receive(ctx, query);
-            //         if (rc == -1) {
-            //             fprintf(stderr, "Communication error: %s\n", modbus_strerror(errno));
-            //             close(fd);
-            //             FD_CLR(fd, &read_fds);
-            //         } else {
-            //             modbus_reply(ctx, query, rc, mb_mapping);  // 요청에 응답
-            //         }
-            //     }
-            // }
         }
     } else if (use_backend == TCP_PI) {
         socket_file_descriptor = modbus_tcp_pi_listen(ctx, 1);
