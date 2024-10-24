@@ -49,7 +49,7 @@ modbus_t* ModbusServer::initialize_modbus_context_simulation() {
     } else if (use_backend == TCP_PI) {
         ctx = modbus_new_tcp_pi(ip_or_device, port);
     } else {
-        ctx = modbus_new_rtu(ip_or_device, std::stoi(port), 'N', 8, 1);
+        ctx = modbus_new_rtu(ip_or_device, BAURATE, 'N', 8, 1);
         modbus_set_slave(ctx, SERVER_ID);
     }
     return ctx;

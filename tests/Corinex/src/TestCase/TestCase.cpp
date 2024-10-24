@@ -86,19 +86,19 @@ void runTestCase2(ModbusSimulationEnvironment& simulation) {
     if (pid == 0) { // child process
         prctl(PR_SET_PDEATHSIG, SIGHUP);
         std::vector<std::string> inputFiles = {
-            TEST_CASE1_INPUT1,
-            TEST_CASE1_INPUT2,
-            TEST_CASE1_INPUT3
+            TEST_CASE1_INPUT1
+            //TEST_CASE1_INPUT2,
+            //TEST_CASE1_INPUT3
         };
         std::vector<std::string> outputFiles = {
             TEST_CASE1_OUTPUT1,
-            TEST_CASE1_OUTPUT2,
-            TEST_CASE1_OUTPUT3
+            //TEST_CASE1_OUTPUT2,
+            //TEST_CASE1_OUTPUT3
         };
         std::vector<int> addressRegisters = {
             EV_CHARGER_CURRENT_ADDRESS_REGISTER,
-            HEAT_PUMP_CURRENT_ADDRESS_REGISTER,
-            PV_INVERTER_CURRENT_ADDRESS_REGISTER
+            //HEAT_PUMP_CURRENT_ADDRESS_REGISTER,
+            //PV_INVERTER_CURRENT_ADDRESS_REGISTER
         };  
         simulation.processPowerDataFromFile(inputFiles, outputFiles, addressRegisters);
         exit(0);

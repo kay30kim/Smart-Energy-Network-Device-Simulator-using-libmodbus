@@ -9,6 +9,7 @@
 #define EV_CHARGER_VOLTAGE_ADDRESS_REGISTER     3024
 #define NUM_REGISTERS   30
 #define SERVER_ID 1
+#define BAURATE 9600
 
 enum {
     TCP,
