@@ -18,6 +18,8 @@ int main(void) {
         return -1;
     }
 
+    modbus_set_debug(ctx, TRUE);
+
     modbus_set_slave(ctx, SLAVE_ID);
 
     if (modbus_connect(ctx) == -1) {
